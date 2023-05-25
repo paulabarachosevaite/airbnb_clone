@@ -1,6 +1,6 @@
 import prisma from "@/app/libs/prismadb";
 
-export interface IListingParams {
+export interface IListingsParams {
   userId?: string;
   guestCount?: number;
   roomCount?: number;
@@ -11,13 +11,15 @@ export interface IListingParams {
   category?: string;
 }
 
-export default async function getListings(params: IListingParams) {
+export default async function getListings(
+  params: IListingsParams
+) {
   try {
     const {
       userId,
-      roomCount,
-      guestCount,
-      bathroomCount,
+      roomCount, 
+      guestCount, 
+      bathroomCount, 
       locationValue,
       startDate,
       endDate,
@@ -33,22 +35,23 @@ export default async function getListings(params: IListingParams) {
     if (category) {
       query.category = category;
     }
+
     if (roomCount) {
       query.roomCount = {
-        gte: +roomCount,
-      };
+        gte: +roomCount
+      }
     }
 
     if (guestCount) {
       query.guestCount = {
-        gte: +guestCount,
-      };
+        gte: +guestCount
+      }
     }
 
     if (bathroomCount) {
       query.bathroomCount = {
-        gte: +bathroomCount,
-      };
+        gte: +bathroomCount
+      }
     }
 
     if (locationValue) {
@@ -61,29 +64,31 @@ export default async function getListings(params: IListingParams) {
           some: {
             OR: [
               {
-                endDate: {gte: startDate},
-                startDate: {lte: startDate},
+                endDate: { gte: startDate },
+                startDate: { lte: startDate }
               },
               {
-                startDate: {lte: endDate},
-                endDate: {gte: endDate},
-              },
-            ],
-          },
-        },
-      };
+                startDate: { lte: endDate },
+                endDate: { gte: endDate }
+              }
+            ]
+          }
+        }
+      }
     }
 
     const listings = await prisma.listing.findMany({
       where: query,
       orderBy: {
-        createdAt: "desc",
-      },
+        createdAt: 'desc'
+      }
     });
+
     const safeListings = listings.map((listing) => ({
       ...listing,
       createdAt: listing.createdAt.toISOString(),
     }));
+
     return safeListings;
   } catch (error: any) {
     throw new Error(error);
